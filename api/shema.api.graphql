@@ -1,0 +1,97 @@
+schema {
+    query: Query
+    mutation: Mutation
+}
+
+type Query {
+    getUserProfile: UserProfile!
+    getNotifications(userId: ID!, limit: Int!, nextToken: String): NotificationPage!
+    getUserGroups(userId: ID!): [Group!]
+    getLocations(groupId: ID!): [Location!]
+    getDevices(locationId: ID!): [Device!]
+    getAlerts(deviceId: ID!, alertType: AlertType!): [Alert!]
+}
+
+type Group {
+    id: ID!
+    name: String!
+    criticalAlerts: Int!
+    locations: [Location!]
+}
+
+type Location {
+    id: ID!
+    name: String!
+    alertPaused: Boolean!
+    devices: [Device!]
+}
+
+type Device {
+    id: ID!
+    status: Status!
+    lastPresenceTime: AWSDateTime!
+    totalPresenceTime: AWSDateTime!
+    lastAttendedBy: UserProfile
+    lastCompletedBy: UserProfile
+}
+
+type Alert {
+    id: ID!
+    type: AlertType!
+    createdAt: AWSDateTime!
+    attendedBy: UserProfile
+    completedBy: UserProfile
+}
+
+enum Status {
+  PRESENT
+  ABSENT
+  HR_HIGH
+  HR_LOW
+  ONLINE
+  OFFLINE
+}
+
+enum AlertType {
+  PRESENT
+  ABSENT
+  HR_HIGH
+  HR_LOW
+}
+
+type UserProfile {
+    id: ID!
+    name: String!
+    username: String!
+    email: String!
+    bio: String
+    imageUrl: AWSURL
+    createdAt: AWSDateTime!
+    notifications: NotificationPage!
+}
+
+type Notification {
+    id: ID!
+    message: String!
+    alert: Alert
+    read: Boolean!
+}
+
+type NotificationPage {
+    notifications: [Notification!]
+    nextToken: String
+}
+
+type Mutation {
+    editUserProfile(newProfile: ProfileInput!): UserProfile!
+    pauseAlert(locationId: ID!): Boolean!
+    unPauseAlert(locationId: ID!): Boolean!
+    attendAlert(alertId: ID!): Boolean!
+    completeAlert(alertId: ID!): Boolean!
+}
+
+input ProfileInput {
+    name: String!
+    imageUrl: AWSURL
+    bio: String
+}
